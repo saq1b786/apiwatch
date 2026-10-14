@@ -12,12 +12,12 @@ class CheckResult:
     latency_ms: float
     error: str | None
 
-def check_url(url: str) -> CheckResult:
+def check_url(url: str, timeout_seconds: float = 10.0) -> CheckResult:
 
     start = time.perf_counter()
 
     try:
-        response = httpx.get(url, follow_redirects=True)
+        response = httpx.get(url, follow_redirects=True, timeout=timeout_seconds)
     except httpx.RequestError as exc:
         latency_ms = (time.perf_counter() - start) * 1000
         return CheckResult(url=url, is_up=False, status_code=None, latency_ms=latency_ms, error=type(exc).__name__)
@@ -25,7 +25,7 @@ def check_url(url: str) -> CheckResult:
         latency_ms = (time.perf_counter() - start) * 1000
         return CheckResult(url=url, is_up=response.is_success, status_code=response.status_code, latency_ms=latency_ms, error=None)
 
-result = check_url("https://this-site-does-not-exist-apiwatch.com")
+result = check_url("http://10.255.255.1", timeout_seconds=2.0)
 print(result)
 
 
