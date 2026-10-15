@@ -39,5 +39,6 @@ def check_url(url: str, timeout_seconds: float = 10.0) -> CheckResult:
         )
 
 
-result = check_url("http://10.255.255.1", timeout_seconds=2.0)
-print(result)
+if __name__ == "__main__":
+    result = check_url("http://10.255.255.1", timeout_seconds=2.0)
+    print(result)
