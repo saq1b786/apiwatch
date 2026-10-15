@@ -1,8 +1,8 @@
 import time
-
 from dataclasses import dataclass
 
 import httpx
+
 
 @dataclass
 class CheckResult:
@@ -12,6 +12,7 @@ class CheckResult:
     latency_ms: float
     error: str | None
 
+
 def check_url(url: str, timeout_seconds: float = 10.0) -> CheckResult:
 
     start = time.perf_counter()
@@ -20,12 +21,23 @@ def check_url(url: str, timeout_seconds: float = 10.0) -> CheckResult:
         response = httpx.get(url, follow_redirects=True, timeout=timeout_seconds)
     except httpx.RequestError as exc:
         latency_ms = (time.perf_counter() - start) * 1000
-        return CheckResult(url=url, is_up=False, status_code=None, latency_ms=latency_ms, error=type(exc).__name__)
+        return CheckResult(
+            url=url,
+            is_up=False,
+            status_code=None,
+            latency_ms=latency_ms,
+            error=type(exc).__name__,
+        )
     else:
         latency_ms = (time.perf_counter() - start) * 1000
-        return CheckResult(url=url, is_up=response.is_success, status_code=response.status_code, latency_ms=latency_ms, error=None)
+        return CheckResult(
+            url=url,
+            is_up=response.is_success,
+            status_code=response.status_code,
+            latency_ms=latency_ms,
+            error=None,
+        )
+
 
 result = check_url("http://10.255.255.1", timeout_seconds=2.0)
 print(result)
-
-
