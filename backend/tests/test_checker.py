@@ -1,7 +1,7 @@
 import httpx
 import respx
 
-from scripts.check_once import check_url
+from app.services.checker import check_url
 
 URL = "https://example.com"
 
