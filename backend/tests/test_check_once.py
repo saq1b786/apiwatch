@@ -1,17 +1,49 @@
+import httpx
+import respx
+
 from scripts.check_once import check_url
 
+URL = "https://example.com"
 
-def test_unreachable_domain_is_down():
-    result = check_url("https://this-site-does-not-exist-apiwatch.com")
+
+@respx.mock
+def test_successful_response_is_up():
+    respx.get(URL).mock(return_value=httpx.Response(200))
+
+    result = check_url(URL)
+
+    assert result.is_up is True
+    assert result.status_code == 200
+    assert result.error is None
+
+
+@respx.mock
+def test_server_error_is_down():
+    respx.get(URL).mock(return_value=httpx.Response(500))
+
+    result = check_url(URL)
+
+    assert result.is_up is False
+    assert result.status_code == 500
+    assert result.error is None
+
+
+@respx.mock
+def test_connection_error_is_down():
+    respx.get(URL).mock(side_effect=httpx.ConnectError)
+
+    result = check_url(URL)
 
     assert result.is_up is False
     assert result.status_code is None
     assert result.error == "ConnectError"
 
 
-def test_missing_page_is_down():
-    result = check_url("https://www.google.com/this-page-does-not-exist")
+@respx.mock
+def test_timeout_is_down():
+    respx.get(URL).mock(side_effect=httpx.ConnectTimeout)
 
+    result = check_url(URL)
     assert result.is_up is False
-    assert result.status_code == 404
-    assert result.error is None
+    assert result.status_code is None
+    assert result.error == "ConnectTimeout"
